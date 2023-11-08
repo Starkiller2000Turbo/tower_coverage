@@ -23,6 +23,9 @@ env:
 req_file:
 	pip freeze -> requirements.txt
 
+make req:
+	pip install -r requirements.txt
+
 test:
 	$(PYTHON)/tests.py
 

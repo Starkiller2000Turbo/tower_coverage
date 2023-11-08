@@ -1,30 +1,16 @@
-CLEAR_COLOR = '#ffe4e1'
-CLEAR_LABEL = 'clear'
-OBSTRUCTED_COLOR = '#741b47'
-OBSTRUCTED_LABEL = 'obstructed'
-COVERED_COLOR = '#ffff00'
-COVERED_LABEL = 'covered'
-OBSTRUCTED_COVERED_COLOR = '#9f0000'
-OBSTRUCTED_COVERED_LABEL = 'obstructed covered'
-TOWER_COLOR = '#6fa8dc'
-TOWER_LABEL = 'tower'
-OVER_COVERED_COLOR = '#e69138'
-OVER_COVERED_LABEL = 'over covered'
-CITY_COLORS = [
-    CLEAR_COLOR,
-    OBSTRUCTED_COLOR,
-    COVERED_COLOR,
-    OBSTRUCTED_COVERED_COLOR,
-    OVER_COVERED_COLOR,
-    TOWER_COLOR,
-]
-CITY_LABELS = [
-    CLEAR_LABEL,
-    OBSTRUCTED_LABEL,
-    COVERED_LABEL,
-    OBSTRUCTED_COVERED_LABEL,
-    OVER_COVERED_LABEL,
-    TOWER_LABEL,
-]
+from collections import OrderedDict
+
+COLORS = OrderedDict(
+    [
+        ('clear', '#ffe4e1'),
+        ('obstructed', '#741b47'),
+        ('covered', '#ffff00'),
+        ('obstructed covered', '#9f0000'),
+        ('over covered', '#e69138'),
+        ('tower', '#6fa8dc'),
+    ],
+)
+CITY_COLORS = list(COLORS.values())
+CITY_LABELS = list(COLORS.keys())
 DEFAULT_OBSTRUCTED_PERCENTAGE = 30.0
 TOTAL_PERCENTAGE = 100
