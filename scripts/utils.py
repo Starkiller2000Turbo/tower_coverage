@@ -104,7 +104,7 @@ def get_covered_area(
         tower_range: tower range.
 
     Returns:
-        Set of covered positions.
+        Set of covered positions without tower position.
     """
     left = max(0, position.y - tower_range)
     right = min(m, position.y + tower_range)
@@ -185,10 +185,15 @@ def find_place_for_tower(
 
     Args:
         tower_range: tower range.
-        farthest_tower_position: farthest tower position.
+        closest_tower position: final worse block (closest to (0.0)).
+        clear_blocks: blocks to place towers.
+        uncovered_blocks: uncovered blocks.
+        covered_clocks: already covered blocks.
+        n: rows amount (height).
+        m: columns amount (width).
 
     Returns:
-        Founded clodest position to the start.
+        Founded farthest position from closest_tower_position.
     """
     farthest_tower_position = Position(
         min(closest_tower_position.x + tower_range, n),
@@ -242,13 +247,13 @@ def find_place_for_tower(
 def calculate_avg_y_distance(
     positions: Set[Position],
 ) -> Union[floating[Any], float]:
-    """Calculate average distance from (0,0) to every position.
+    """Calculate average distance from 0 to every y coordinate.
 
     Args:
         positions: positions to calculate average distance.
 
     Returns:
-        Average distance to all positions.
+        Average distance to all y coordinates.
     """
     if len(positions) == 0:
         return inf
@@ -258,13 +263,13 @@ def calculate_avg_y_distance(
 def calculate_avg_x_distance(
     positions: Set[Position],
 ) -> Union[floating[Any], float]:
-    """Calculate average distance from (0,0) to every position.
+    """Calculate average distance from 0 to every x coordinate.
 
     Args:
         positions: positions to calculate average distance.
 
     Returns:
-        Average distance to all positions.
+        Average distance to all x coordinates.
     """
     if len(positions) == 0:
         return inf
@@ -274,13 +279,13 @@ def calculate_avg_x_distance(
 def get_min_x_with_min_y(
     positions: Set[Position],
 ) -> Position:
-    """Calculate average distance from (0,0) to every position.
+    """Find position with minimal x, which has minimal y.
 
     Args:
-        positions: positions to calculate average distance.
+        positions: positions to calculate.
 
     Returns:
-        Average distance to all positions.
+        Position with minimal x, which has minimal y.
     """
     if len(positions) == 0:
         return Position(inf, inf)
@@ -290,13 +295,13 @@ def get_min_x_with_min_y(
 def get_min_y_with_min_x(
     positions: Set[Position],
 ) -> Position:
-    """Calculate average distance from (0,0) to every position.
+    """Find position with minimal y, which has minimal x.
 
     Args:
-        positions: positions to calculate average distance.
+        positions: positions to calculate.
 
     Returns:
-        Average distance to all positions.
+        Position with minimal y, wgich has minimal x.
     """
     if len(positions) == 0:
         return Position(inf, inf)
@@ -311,7 +316,7 @@ def additionally_optimize_place_for_tower(
     n: int,
     m: int,
 ) -> Position:
-    """Optimize place for tower by average distance.
+    """Optimize place for tower.
 
     Args:
         start_position: specified position to start optimization.
@@ -322,7 +327,7 @@ def additionally_optimize_place_for_tower(
         m: columns amount (width).
 
     Returns:
-        Set of covered positions.
+        Optimized position.
     """
     optimal_position = start_position
     optimal_covered = get_total_covered_area(

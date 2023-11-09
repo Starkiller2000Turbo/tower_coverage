@@ -1,15 +1,18 @@
 from unittest import TestCase, main
 
 from classes import CityGrid
-from constants import DEFAULT_OBSTRUCTED_PERCENTAGE
-
-TEST_WIDTH = 100
-TEST_HEIGHT = 100
-TEST_PERCENTAGE = 73.5
+from constants import (
+    DEFAULT_OBSTRUCTED_PERCENTAGE,
+    TEST_HEIGHT,
+    TEST_PERCENTAGE,
+    TEST_RANGE,
+    TEST_TOWERS_AMOUNT,
+    TEST_WIDTH,
+)
 
 
 class TestCityGridAttributes(TestCase):
-    """Класс для тестирования аттрибутов класса CityGrid."""
+    """Class for CityGrid attributes testing."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -56,7 +59,7 @@ class TestCityGridAttributes(TestCase):
         self.assertEqual(
             (TEST_HEIGHT, TEST_WIDTH),
             city.grid.shape,
-            'Сетка неверного размера',
+            'Grid has wrong shape',
         )
 
     def test_city_str(self) -> None:
@@ -66,10 +69,10 @@ class TestCityGridAttributes(TestCase):
 
 
 class TestCityGridMethods(TestCase):
-    """Класс для тестирования методов класса CityGrid."""
+    """Class for CityGrid methods testing."""
 
     def setUp(self) -> None:
-        """Подготовка данных для тестирования."""
+        """Create data for testing."""
         self.city = CityGrid(  # type: ignore[attr-defined]
             TEST_WIDTH,
             TEST_HEIGHT,
@@ -97,7 +100,7 @@ class TestCityGridMethods(TestCase):
         )
 
     def test_change_obstructed(self) -> None:
-        """Проверка замены процента затруднения."""
+        """Test obstructed percentage changing."""
         city = TestCityGridAttributes.city  # type: ignore[attr-defined]
         city.change_obstructed(
             TEST_PERCENTAGE,
@@ -105,26 +108,50 @@ class TestCityGridMethods(TestCase):
         self.assertEqual(
             TEST_PERCENTAGE,
             city.min_percentage,
-            'Проценты сохранены неправильно',
+            'Min percentage saved incorrectly',
         )
         self.assertGreaterEqual(
             city.percentage,  # type: ignore[attr-defined]
             TEST_PERCENTAGE,
-            'Процент меньше заданного',
+            'Real percentage is less than specified',
         )
         self.check_attributes(city)
 
-    def test_clear_city(self) -> None:
-        """Проверка замены процента затруднения."""
+    def change_place_tower(self) -> None:
+        """Test placing tower."""
         city = TestCityGridAttributes.city  # type: ignore[attr-defined]
-        for _ in range(10):
+        clear_place = city.clear_blocks[-1]
+        city.place_tower(clear_place, TEST_RANGE)
+        towers = city.towers
+        self.assertEqual(
+            len(towers),
+            1,
+            'Tower not placed or placed more than one time',
+        )
+        tower = city.towers[0]
+        self.assertEqual(
+            tower.position,
+            clear_place,
+            'Tower placed at the wrong spot',
+        )
+        self.assertEqual(tower.range, TEST_RANGE, 'Tower has incorrect range')
+
+    def test_clear_city(self) -> None:
+        """Test cleat city."""
+        city = TestCityGridAttributes.city  # type: ignore[attr-defined]
+        for _ in range(TEST_TOWERS_AMOUNT):
             clear_position = city.clear_blocks.pop()
-            city.place_tower(clear_position, 10)
+            city.place_tower(clear_position, TEST_RANGE)
         city.clear_city()
         self.assertGreaterEqual(
             city.towers,
             [],
             'Some towers left',
+        )
+        self.assertGreaterEqual(
+            city.paths,
+            [],
+            'Some paths left',
         )
         self.assertEqual(city.covered_blocks, set(), 'Covered blocks left')
         self.assertEqual(
@@ -137,6 +164,18 @@ class TestCityGridMethods(TestCase):
             set(),
             'Obstructed covered blocks left',
         )
+        self.check_attributes(city)
+
+    def test_cover_with_towers(self) -> None:
+        """Test method cover_with_towers."""
+        city = TestCityGridAttributes.city  # type: ignore[attr-defined]
+        city.cover_with_towers(TEST_RANGE)
+        self.assertNotEqual(
+            city.towers,
+            [],
+            'No towers created',
+        )
+        self.assertEqual(city.uncovered_blocks, set(), 'Uncovered blocks left')
         self.check_attributes(city)
 
 

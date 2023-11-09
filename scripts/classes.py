@@ -4,7 +4,12 @@ from typing import List, Set
 
 from matplotlib import colors, patches, pyplot
 
-from constants import CITY_COLORS, CITY_LABELS, DEFAULT_OBSTRUCTED_PERCENTAGE
+from constants import (
+    CITY_COLORS,
+    CITY_LABELS,
+    DEFAULT_OBSTRUCTED_PERCENTAGE,
+    GRID_VALUES,
+)
 from objects import Path, Position, Tower
 from utils import (
     additionally_optimize_place_for_tower,
@@ -49,7 +54,11 @@ class CityGrid:
         self.uncovered_blocks: Set[Position] = self.clear_blocks.copy()
         self.obstructed_covered_blocks: Set[Position] = set()
         self.over_covered_blocks: Set[Position] = set()
-        self.grid = create_grid_from_data(n, m, {1: self.obstructed_blocks})
+        self.grid = create_grid_from_data(
+            n,
+            m,
+            {GRID_VALUES['obstructed']: self.obstructed_blocks},
+        )
 
     def get_name(self) -> str:
         """Create the name of class CityGrid.
@@ -77,8 +86,8 @@ class CityGrid:
             self.grid,
             cmap=cmap,
             edgecolors='k',
-            vmin=0,
-            vmax=len(CITY_COLORS),
+            vmin=min(GRID_VALUES.values()),
+            vmax=max(GRID_VALUES.values()),
         )
         color_patches = [
             patches.Patch(
@@ -139,7 +148,10 @@ class CityGrid:
             self.uncovered_blocks = self.clear_blocks.copy()
             self.obstructed_blocks -= new_clear_blocks
             self.obstructed_amount = new_obstructed_amount
-            change_grid_from_data(self.grid, {0: new_clear_blocks})
+            change_grid_from_data(
+                self.grid,
+                {GRID_VALUES['clear']: new_clear_blocks},
+            )
 
     def place_tower(self, position: Position, tower_range: int) -> None:
         """Place tower to provided place.
@@ -151,7 +163,11 @@ class CityGrid:
         Returns:
             Created tower object.
         """
-        if self.grid[position] in (1, 3, 5):
+        if self.grid[position] in (
+            GRID_VALUES['obstructed'],
+            GRID_VALUES['obstructed covered'],
+            GRID_VALUES['tower'],
+        ):
             raise Exception('Forbidden to place the tower')
         tower = Tower(
             position,
@@ -177,31 +193,34 @@ class CityGrid:
         change_grid_from_data(
             self.grid,
             {
-                2: new_covered_blocks,
-                3: new_obstructed_covered_blocks,
-                4: new_over_covered_blocks,
-                5: set([tower.position]),
+                GRID_VALUES['covered']: new_covered_blocks,
+                GRID_VALUES[
+                    'obstructed covered'
+                ]: new_obstructed_covered_blocks,
+                GRID_VALUES['over covered']: new_over_covered_blocks,
+                GRID_VALUES['tower']: set([tower.position]),
             },
         )
 
     def clear_city(self) -> None:
-        """Clear city grid from all towers."""
+        """Clear city grid from all towers and paths."""
         tower_blocks = {tower.position for tower in self.towers}
         self.clear_blocks |= tower_blocks
         self.uncovered_blocks = self.clear_blocks.copy()
         change_grid_from_data(
             self.grid,
             {
-                0: self.covered_blocks
+                GRID_VALUES['clear']: self.covered_blocks
                 | self.over_covered_blocks
                 | tower_blocks,
-                1: self.obstructed_covered_blocks,
+                GRID_VALUES['obstructed']: self.obstructed_covered_blocks,
             },
         )
         self.covered_blocks = set()
         self.over_covered_blocks = set()
         self.obstructed_covered_blocks = set()
         self.towers = []
+        self.paths = []
 
     def cover_with_towers(self, tower_range: int) -> None:
         """Cover the whole city with minimum amount of towers.
@@ -240,11 +259,7 @@ class CityGrid:
             )
 
     def create_paths(self) -> None:
-        """Create paths between all towers.
-
-        Returns:
-            pyplot object which contains grid and paths.
-        """
+        """Create paths between all towers on pyplot."""
         for index1 in range(len(self.towers)):
             for index2 in range(index1 + 1, len(self.towers)):
                 tower1 = self.towers[index1]
@@ -268,14 +283,11 @@ class CityGrid:
         position1: Position,
         position2: Position,
     ) -> None:
-        """Create paths between all towers.
+        """Create path between two towers on pyplot.
 
         Args:
             position1: position of the first tower.
             position2: position of the second tower.
-
-        Returns:
-            pyplot object which contains grid and path.
         """
         find_tower_by_path(self.towers, position1)
         find_tower_by_path(self.towers, position1)
